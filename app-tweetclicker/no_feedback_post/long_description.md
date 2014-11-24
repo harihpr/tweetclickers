@@ -1,0 +1,2 @@
+Welcome to Tweetclickers / Artificial Intelligence for Disaster Response (AIDR).
+Disaster responders need your help! The purpose of this app is to help disaster responders by quickly identifying and categorizing tweets relevant to the event. This is something that computers aren’t very good at - but people ARE. We will ask you to suggest a category for several tweets that we have collected about the event. We will use your responses, combined with the responses of other volunteers, to help classify tweets a large number of tweets in a small amount of time.

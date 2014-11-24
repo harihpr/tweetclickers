@@ -1,0 +1,121 @@
+<style>
+    pos {
+        position: absolute;
+        left: 50%;
+    }
+</style>
+<div class="row skeleton">
+    <div id="question">
+    </div>
+    <div class="accordion" id="consentform">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+                    Show full consent details
+                </a>
+            </div>
+            <div id="collapseOne" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    Participating in this study means filling in a brief survey before and in the end of the work. You can participate in this study anonymously, but if you chose to give your name/e-mail … (brief explanation) … The full consent form is below:
+                    <br>
+                    University of Washington researchers are collaborating with QCRI on a research study. We want to improve the user experience of the AIDR-Micromappers site. We also want to understand the work of digital humanitarians and other online volunteers. We would like to invite you to take part in this study.
+                    <br>
+                    If you choose to take part in this study, we will randomly assign you to a specific design of this interface. Your activity will be the same as every other volunteer. However, your screen content may vary. We will record, store and analyze your actions within this computer system.
+                    <br>
+                    If you choose to participate, we will ask you to complete a short survey (&lt;5 minutes) before you get started today. For our research, we will link together your computer activity and survey responses. 
+                    <br>
+                    We will also invite you to take a  longer, optional survey (~15 minutes) when the event deployment ends. For the second survey, we will request an email address where we can contact you. You will then receive a notification about 2 weeks after your participation in this deployment. That web-based survey will request your feedback on the system. After the survey, we will delete any link to your email address.
+                    <br>
+                    You will not directly benefit from taking part in this study. However, we hope that this study will help us create a better user experience for volunteers, like you, in the future.
+                    <br>
+                    There are no physical risks for this study. However, some people do not want to provide information for research.
+                    <br>
+                    Taking part in this study is voluntary. You can choose to stop at any time. If you choose not to participate in this study, you can still participate as a volunteer for this deployment of the AIDR-Micromappers system.
+                    <br>
+                    If you have questions about this study, please contact Kate Starbird at (206) 313 2766 or kstarbi@uw.edu. If you have questions about your rights as a research subject, please contact the UW Human Subjects Division at (206) 543-0098.
+                </div>
+            </div>
+        </div>
+    </div>
+    Please indicate your choice about taking part in this study: 
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="yes"> <strong>I agree</strong> and provide my consent to participate in the study.
+        </label>
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="no"> <strong>I do not agree</strong> to participate in the study.
+        </label>
+    </div>
+    <br>
+    <button type="button" class="btn btn-primary pos" disabled="disabled" id="done" value='Done'>Done</button>
+</div>
+<div id="finish" class="row" style="visibility:hidden;">
+    <!-- Success and Error Messages for the user --> 
+    <div class="col-md-6 col-md-offset-2" style="height:50px">
+        <div id="disagree" class="alert alert-success">
+            <strong id="i18n_congratulations">Your choice has been recorded.</strong> <span id="i18n_congratulations_text">Please Click the button to start contributing.</span>
+            <br/>
+            <div class="alert-actions">
+                <a class="btn small" href="/app/tweetclicker_post/newtask">Start</a>
+            </div>
+        </div>
+        <div id="agree" class="alert alert-success">
+            <strong id="i18n_congratulations">Your choice has been recorded.</strong> <span id="i18n_congratulations_text">Thank you for agreeing to participate. For the research, we'd like to ask you a few demographic questions before you start.</span>
+            <br/>
+            <div class="alert-actions">
+                <a class="btn small" href="/app/survey_100fb/newtask">Start</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Your JavaScript code
+    
+    pybossa.taskLoaded(function(task, deferred){
+        if ( !$.isEmptyObject(task) ) {
+            var p = $('<p/>');
+            p.text(task.info.question);
+            task.info.question = p;
+            deferred.resolve(task);
+        }
+        else {
+            deferred.resolve(task);
+        }
+    });
+
+    pybossa.presentTask(function(task, deferred) {
+        if ( !$.isEmptyObject(task) ) {
+            $('#question').html("</h5>"+task.info.question_text+"</h5>");
+            $("input[type='radio']").change(function(event){
+                if($(event.target).is(':checked')) {
+                    $('#done').removeAttr('disabled');
+                }
+                else {
+                    $('#done').attr('disabled','disabled');
+                }
+            });
+
+            $('#done').off('click').on('click', function(event) {
+                selectedAnswer = $("input[type='radio']:checked").val();
+                if(selectedAnswer == "yes") {
+                    $('#disagree').hide();
+                }
+                else {
+                    $('#agree').hide();
+                }
+                pybossa.saveTask(task.id, selectedAnswer).done(function() {
+                    deferred.resolve();
+                });
+            });
+        }
+        else {
+            $(".skeleton").hide();
+            $("#loading").hide();
+            $("#finish").css("visibility","visible").fadeIn(500);
+        }
+    });
+
+    pybossa.run('userconsent_100fb');
+</script>

@@ -1,0 +1,155 @@
+<style>
+    #feedback {
+        visibility: hidden;
+    }
+    
+    .correctans {
+        border: 1px solid green;
+    }
+    
+    .incorrectans {
+        border: 1px solid red;
+    }
+</style>
+<div class="row skeleton">
+    <p>
+        <h3>
+            <span id="tasks_completed">You have completed:</span>
+            <span id="done" class="label label-info"></span> <span id="tasks_from">tasks of</span>
+            <span id="total" class="label label-info"></span> in this batch.
+        </h3>
+    </p>
+    <h3>Please select the type of the following tweet:</h3>
+    <div id="tweet">
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="injury"> Injury/Fatality
+        </label>
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="damage"> Damage
+        </label>
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="shelter"> Shelter
+        </label>
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="food"> Food/Water
+        </label>
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="other"> Other Useful Info
+        </label>
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="none"> None of the above
+        </label>
+    </div>
+    <br>
+    <div id="feedback" class="alert" role="alert"></div>
+    <button type="button" class="btn btn-primary" disabled="disabled" id="confirm" value='Confirm'>Confirm</button>
+</div>
+<div id="finish" class="row" style="visibility:hidden;">
+    <!-- Success and Error Messages for the user --> 
+    <div class="col-md-6 col-md-offset-2" style="height:50px">
+        <div class="alert alert-success">
+            <span id="i18n_congratulations_text">You are responses are recorded for the first batch of tweets. Please click the below button to take the post activity question.</span>
+            <br/>
+            <div class="alert-actions">
+                <a class="btn small" href="/app/se_post_nofb/newtask">OK</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Your JavaScript code
+    function loadUserProgress() {
+        pybossa.userProgress('tweetclicker_pre').done(function(data){
+            var pct = Math.round((data.done*100)/data.total);
+            $("#total").text(data.total);
+            $("#done").text(data.done);
+        });
+    }
+    
+    pybossa.taskLoaded(function(task, deferred){
+        if ( !$.isEmptyObject(task) ) {
+            var p = $('<p/>');
+            p.text(task.info.tweet);
+            task.info.tweet = p;
+            deferred.resolve(task);
+        }
+        else {
+            deferred.resolve(task);
+        }
+    });
+
+    pybossa.presentTask(function(task, deferred) {
+        if ( !$.isEmptyObject(task) ) {
+            $('#tweet').html("<h3>"+task.info.tweet_text+"</h3>");
+            var tweet_type = task.info.tweet_type;
+            var tweet_answer = task.info.tweet_category;
+            loadUserProgress();
+            
+            $("input[type='radio']").change(function(event){
+                if($(event.target).is(':checked')) {
+                    $('#confirm').removeAttr('disabled');
+                }
+                else {
+                    $('#confirm').attr('disabled','disabled');
+                }
+            });
+
+            $('#confirm').off('click').on('click', function(event) {
+                selectedAnswer = $("input[type='radio']:checked");
+                if($(event.target).text() == "Next") {
+                    pybossa.saveTask(task.id, selectedAnswer.val()).done(function() {
+                        deferred.resolve();
+                    });
+                    $(event.target).text('Confirm');
+                    $(event.target).attr('disabled','disabled');
+                    $("label").removeClass("correctans incorrectans");
+                    $("input[type='radio']").removeAttr('disabled');
+                    $("input[type='radio']").attr("checked",false);
+                    $("input[type='radio']").parent('label:eq(0)').removeClass("correctans");
+                    $("#feedback").removeClass("alert-success alert-danger alert-info").css('visibility','hidden');
+                }
+                else {
+                    if(tweet_type == 'test') {
+                        if(selectedAnswer.val() == tweet_answer) {
+                            selectedAnswer.parent('label:eq(0)').addClass("correctans");
+                            $("#feedback").css('visibility','visible').addClass("alert-success").text("Feedback: Your category choice for this tweet is the same as our trained volunteers.");
+                        }
+                        else {
+                            selectedAnswer.parent('label:eq(0)').addClass("incorrectans");
+                            correctAnswer =  $('input[type="radio"]').filter(function(){
+                                return this.value === tweet_answer;
+                            });
+                            correctAnswer.parent('label:eq(0)').addClass("correctans");
+                            $("#feedback").css("visibility","visible").addClass("alert-danger").text("Feedback: Our trained volunteers chose a different category for this tweet.");
+                        }
+                    }
+                    else {
+                      $("#feedback").css("visibility","visible").addClass("alert-info").text("Feedback: No feedback. This tweet has not been categorized before.");
+                    }
+
+                    $("input[type='radio']").attr('disabled',true);
+                    $(event.target).text('Next');
+                }
+            });
+        }
+        else {
+            $(".skeleton").hide();
+            $("#loading").hide();
+            $("#finish").css("visibility","visible").fadeIn(500);
+        }
+    });
+
+    pybossa.run('tweetclicker_pre');
+</script>

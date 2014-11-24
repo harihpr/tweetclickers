@@ -1,0 +1,182 @@
+<style>
+    #feedback {
+        visibility: hidden;
+    }
+    
+    .correctans {
+        border: 1px solid green;
+    }
+    
+    .incorrectans {
+        border: 1px solid red;
+    }
+</style>
+<div class="row skeleton">
+    <p>
+        <h3>
+            <span id="tasks_completed">You have completed:</span>
+            <span id="done" class="label label-info"></span> <span id="tasks_from">tasks of</span>
+            <span id="total" class="label label-info"></span> in this batch.
+        </h3>
+    </p>
+    <h3>Please select the type of the following tweet:</h3>
+    <div class="row">
+      <div class="span6 offset3">
+        <table class="table table-bordered">
+          <tbody>
+            <tr>
+              <td><i class="icon icon-user"></i>&nbsp;<strong>Username</strong>&nbsp;&nbsp;@username&nbsp;&nbsp;.&nbsp;&nbsp;19 Nov</td>
+            </tr>
+            <tr>
+              <td id="tweet"></td>
+            </tr>
+            <tr>
+              <td><i class="icon icon-share-alt"></i>&emsp;&emsp;<i class="icon icon-retweet"></i>&nbsp;&nbsp;81&emsp;&emsp;<i class="icon icon-star"></i>&nbsp;&nbsp;5</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+  	</div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="injury"> Injury/Fatality
+        </label>
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="damage"> Damage
+        </label>
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="shelter"> Shelter
+        </label>
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="food"> Food/Water
+        </label>
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="other"> Other Useful Info
+        </label>
+    </div>
+    <div class="panel panel-default">
+        <label>
+          <input type="radio" name="answers" value="none"> None of the above
+        </label>
+    </div>
+    <br>
+    <div id="feedback" class="alert" role="alert"></div>
+    <button type="button" class="btn btn-primary" disabled="disabled" id="confirm" value='Confirm'>Confirm</button>
+</div>
+<div id="finish" class="row" style="visibility:hidden;">
+    <div class="modal" style="position:absolute;top:15%;left:25%;z-index:1">
+        <div class="modal-body">
+            You have completed a batch of twenty tweets. Please continue with your next batch or sign out and come back later.<br>
+            Your help is highly appreciated. Thank you.
+            <br>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="continue" value='continue'>Continue</button>
+                <button type="button" class="btn btn-primary" id="signout" value='signout'>Sign out</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Your JavaScript code
+    function loadUserProgress() {
+        pybossa.userProgress('tweetclicker_post_prfb').done(function(data){
+            var pct = Math.round((data.done*100)/data.total);
+            $("#total").text(data.total);
+            $("#done").text(data.done);
+            if(data.total >= 20 && data.total % 20 == 0) {
+                $(".skeleton").hide();
+                $("#finish").css("visibility","visible");
+            }
+            $('#continue').click(
+                function() {
+                    $(".skeleton").show();
+                    $("#finish").css("visibility","hidden");
+                }
+            );
+            $('#signout').click(
+                function() {
+                    window.location.href = "/account/signout";
+                }
+            );
+        });
+    }
+    
+    pybossa.taskLoaded(function(task, deferred){
+        if ( !$.isEmptyObject(task) ) {
+            var p = $('<p/>');
+            p.text(task.info.tweet);
+            task.info.tweet = p;
+            deferred.resolve(task);
+        }
+        else {
+            deferred.resolve(task);
+        }
+    });
+
+    pybossa.presentTask(function(task, deferred) {
+        if ( !$.isEmptyObject(task) ) {
+            $('#tweet').html("<h3>"+task.info.tweet_text+"</h3>");
+            var tweet_type = task.info.tweet_type;
+            var tweet_answer = task.info.tweet_category;
+            loadUserProgress();
+            
+            $("input[type='radio']").change(function(event){
+                if($(event.target).is(':checked')) {
+                    $('#confirm').removeAttr('disabled');
+                }
+                else {
+                    $('#confirm').attr('disabled','disabled');
+                }
+            });
+
+            $('#confirm').off('click').on('click', function(event) {
+                selectedAnswer = $("input[type='radio']:checked");
+                if($(event.target).text() == "Next") {
+                    pybossa.saveTask(task.id, selectedAnswer.val()).done(function() {
+                        deferred.resolve();
+                    });
+                    $(event.target).text('Confirm');
+                    $(event.target).attr('disabled','disabled');
+                    $("label").removeClass("correctans incorrectans");
+                    $("input[type='radio']").removeAttr('disabled');
+                    $("input[type='radio']").attr("checked",false);
+                    $("input[type='radio']").parent('label:eq(0)').removeClass("correctans");
+                    $("#feedback").removeClass("alert-success alert-danger alert-info").css("visibility","hidden");
+                }
+                else {
+                    if(tweet_type == 'test') {
+                        if(selectedAnswer.val() == tweet_answer) {
+                            selectedAnswer.parent('label:eq(0)').addClass("correctans");
+                            $("#feedback").css("visibility","visible").addClass("alert-success").text("Feedback: Your category choice for this tweet is the same as our trained volunteers.");
+                        }
+                        else {
+                            selectedAnswer.parent('label:eq(0)').addClass("incorrectans");
+                            correctAnswer =  $('input[type="radio"]').filter(function(){
+                                return this.value === tweet_answer;
+                            });
+                            correctAnswer.parent('label:eq(0)').addClass("correctans");
+                            $("#feedback").css("visibility","visible").addClass("alert-danger").text("Feedback: Our trained volunteers chose a different category for this tweet.");
+                        }
+                    }
+
+                    $("input[type='radio']").attr('disabled',true);
+                    $(event.target).text('Next');
+                }
+            });
+        }
+        else {
+            alert("You have coded all the tweets. Thank you for your time and effort. Your work is greatly appreciated");
+            window.location.href = "/account/signout";
+        }
+    });
+
+    pybossa.run('tweetclicker_post_prfb');
+</script>

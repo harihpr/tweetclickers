@@ -1,0 +1,6 @@
+{
+    "name": "UserConsent",
+    "short_name": "userconsent",
+    "description": "Get the consent from users for the study.",
+    "question": "Please provide your consent for the study"
+}

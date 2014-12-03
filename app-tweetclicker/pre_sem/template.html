@@ -1,0 +1,138 @@
+<div class="span6">
+  <h5>Read the following example Tweet and categories.</h5>
+</div>
+<br>
+<div class="well span6">
+  <div class="row">
+    <div class="span6">
+      <table class="table table-bordered">
+        <tbody>
+          <tr>
+            <td><i class="icon icon-user"></i>&nbsp;<strong>Username</strong>&nbsp;&nbsp;@username&nbsp;&nbsp;.&nbsp;&nbsp;</td>
+          </tr>
+          <tr>
+            <td>Wildwood Baptist Church on 20th betwn Duquesne &nbsp; Kenser Rd has food, water, nurses on staff 4 injuries, clothing, cots... #joplin #MOHaves</td>
+          </tr>
+          <tr>
+            <td><i class="icon icon-share-alt"></i>&emsp;&emsp;<i class="icon icon-retweet"></i>&nbsp;&nbsp;--&emsp;&emsp;<i class="icon icon-star"></i>&nbsp;&nbsp;--</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="span6">
+      <div class="panel panel-default">
+	  <label>
+        <input type="radio" disabled> Injury/Fatality
+	  </label>
+      </div>
+      <div class="panel panel-default">
+	  <label>
+        <input type="radio" disabled> Damage
+	  </label>
+      </div>
+      <div class="panel panel-default">
+	  <label>
+        <input type="radio" disabled> Shelter
+	  </label>
+      </div>
+      <div class="panel panel-default">
+	  <label>
+        <input type="radio" disabled> Food/Water
+	  </label>
+      </div>
+      <div class="panel panel-default">
+	  <label>
+        <input type="radio" disabled> Other Useful Info
+	  </label>
+      </div>
+      <div class="panel panel-default">
+	  <label>
+        <input type="radio" disabled> None of the above
+	  </label>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="span6">
+     <span id="question"> 
+     </span>
+     <table style="border: 0; width: 98%;">
+        <tr>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="0"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="1"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="2"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="3"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="4"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="5"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="6"><br></label></td>
+        </tr>
+        <tr>
+            <td style="width: 14%; text-align: center;"><h5>Not Confident</h5></td>
+            <td style="width: 14%; text-align: center;">&nbsp;&nbsp;</td>
+            <td style="width: 14%; text-align: center;">&nbsp;&nbsp;</td>
+            <td style="width: 14%; text-align: center;"><h5>Somewhat Confident</h5></td>
+            <td style="width: 14%; text-align: center;">&nbsp;&nbsp;</td>
+            <td style="width: 14%; text-align: center;">&nbsp;&nbsp;</td>
+            <td style="width: 14%; text-align: center;"><h5>Confident</h5></td>
+        </tr>
+       <tr>
+         <td colspan="7"><button type="button" class="btn btn-primary" disabled="disabled" id="confirm" value='Confirm'>OK</button></td>
+       </tr>
+    </table>
+    <br>
+</div>
+<script>
+    // Your JavaScript code
+    
+    pybossa.taskLoaded(function(task, deferred){
+        if ( !$.isEmptyObject(task) ) {
+            var p = $('<p/>');
+            p.text(task.info.tweet);
+            task.info.tweet = p;
+            deferred.resolve(task);
+        }
+        else {
+            deferred.resolve(task);
+        }
+    });
+
+    pybossa.presentTask(function(task, deferred) {
+        if ( !$.isEmptyObject(task) ) {
+            $('#question').html("<h5>"+task.info.question_text+"</h5>");
+            
+            $("input[type='radio']").change(function(event){
+                if($(event.target).is(':checked')) {
+                    $('#confirm').removeAttr('disabled');
+                }
+                else {
+                    $('#confirm').attr('disabled','disabled');
+                }
+            });
+
+            $('#confirm').off('click').on('click', function(event) {
+                selectedAnswer = $("input[type='radio']:checked");
+                pybossa.saveTask(task.id, selectedAnswer.val()).done(function() {
+                    deferred.resolve();
+                });
+            });
+        }
+        else {
+            var x = Math.floor((Math.random() * 10) + 1);
+          	x = x%3;
+          	if(x==0) {
+              window.location.href = "/app/tweetclicker_pre_nofb/newtask";
+            }
+          	else if(x==1) {
+              window.location.href = "/app/tweetclicker_pre_40fb/newtask";
+            }
+          	else {
+              window.location.href = "/app/tweetclicker_pre_100fb/newtask";
+            }
+        }
+    });
+
+    pybossa.run('pre_sem');
+</script>
+

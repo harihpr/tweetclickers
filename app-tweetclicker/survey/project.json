@@ -1,0 +1,6 @@
+{
+    "name": "DemographicSurvey",
+    "short_name": "survey",
+    "description": "Demographic survey of users who have agreed to participate in the study.",
+    "question": "Please answer the following question"
+}

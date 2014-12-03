@@ -1,0 +1,132 @@
+<style>
+    #feedback {
+        display: none;
+    }
+    
+    .correctans {
+        border: 1px solid green;
+    }
+    
+    .incorrectans {
+        border: 1px solid red;
+    }
+</style>
+<div class="row skeleton">
+    See the example task below.
+        <br>
+    <p id="question"> 
+    </p>
+    <br>
+    <table style="border: 0; width: 98%;">
+        <tr>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="0"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="1"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="2"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="3"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="4"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="5"><br></label></td>
+            <td style="width: 14%; text-align: center;"><label class="radio-inline"><input type="radio" name="optradio" value="6"><br></label></td>
+        </tr>
+        <tr>
+            <td style="width: 14%; text-align: center;">Not Confident</td>
+            <td style="width: 14%; text-align: center;">&nbsp;&nbsp;</td>
+            <td style="width: 14%; text-align: center;">&nbsp;&nbsp;</td>
+            <td style="width: 14%; text-align: center;">Somewhat Confident</td>
+            <td style="width: 14%; text-align: center;">&nbsp;&nbsp;</td>
+            <td style="width: 14%; text-align: center;">&nbsp;&nbsp;</td>
+            <td style="width: 14%; text-align: center;">Confident</td>
+        </tr>
+    </table>
+    <br>
+    <p>
+        <strong>Wildwood Baptist Church on 20th betwn Duquesne & Kenser Rd has food, water, nurses on staff 4 injuries, clothing, cots... #joplin #MOHaves</strong>
+        <br>
+        <div class="panel panel-default">
+            <label>
+              <input type="radio" disabled> Injury/Fatality
+            </label>
+        </div>
+        <div class="panel panel-default">
+            <label>
+              <input type="radio" disabled> Damage
+            </label>
+        </div>
+        <div class="panel panel-default">
+            <label>
+              <input type="radio" disabled> Shelter
+            </label>
+        </div>
+        <div class="panel panel-default">
+            <label>
+              <input type="radio" disabled> Food/Water
+            </label>
+        </div>
+        <div class="panel panel-default">
+            <label>
+              <input type="radio" disabled> Other Useful Info
+            </label>
+        </div>
+        <div class="panel panel-default">
+            <label>
+              <input type="radio" disabled> None of the above
+            </label>
+        </div>
+    </p>
+    <button type="button" class="btn btn-primary" disabled="disabled" id="confirm" value='Confirm'>Confirm</button>
+</div>
+<div id="finish" class="row" style="visibility:hidden;">
+    <!-- Success and Error Messages for the user --> 
+    <div class="col-md-6 col-md-offset-2" style="height:50px">
+        <div class="alert alert-success">
+            <span id="i18n_congratulations_text">Your response has been noted. Please click the below button to proceed to coding the tweets.</span>
+            <br/>
+            <div class="alert-actions">
+                <a class="btn small" href="/app/_tweet_clicker_pre/newtask">Get Started</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Your JavaScript code
+    
+    pybossa.taskLoaded(function(task, deferred){
+        if ( !$.isEmptyObject(task) ) {
+            var p = $('<p/>');
+            p.text(task.info.tweet);
+            task.info.tweet = p;
+            deferred.resolve(task);
+        }
+        else {
+            deferred.resolve(task);
+        }
+    });
+
+    pybossa.presentTask(function(task, deferred) {
+        if ( !$.isEmptyObject(task) ) {
+            $('#question').html("<strong>"+task.info.question_text+"</strong>");
+            
+            $("input[type='radio']").change(function(event){
+                if($(event.target).is(':checked')) {
+                    $('#confirm').removeAttr('disabled');
+                }
+                else {
+                    $('#confirm').attr('disabled','disabled');
+                }
+            });
+
+            $('#confirm').off('click').on('click', function(event) {
+                selectedAnswer = $("input[type='radio']:checked");
+                pybossa.saveTask(task.id, selectedAnswer.val()).done(function() {
+                    deferred.resolve();
+                });
+            });
+        }
+        else {
+            $(".skeleton").hide();
+            $("#loading").hide();
+            $("#finish").css("visibility","visible").fadeIn(500);
+        }
+    });
+
+    pybossa.run('se_pre_100fb');
+</script>

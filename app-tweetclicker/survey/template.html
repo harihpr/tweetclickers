@@ -103,6 +103,11 @@
         </div>
         <div class="panel panel-default">
             <label>
+              <input type="checkbox" name="answers" value="friend"> Recommended by a friend
+            </label>
+        </div>
+        <div class="panel panel-default">
+            <label>
               <input type="checkbox" name="answers" value="help_emergency_responders"> Want to help emergency responders
             </label>
         </div>
@@ -149,8 +154,13 @@
             </label>
         </div>
     </div>
+    <div id="email" class="survey_choices">
+        <div class="panel panel-default">
+            <input type="text" class="form-control">
+        </div>
+    </div>
     <br>
-    <button type="button" class="btn btn-primary" disabled="disabled" id="next" value='Next'>Next</button>
+    <button type="button" class="btn btn-primary" id="next" value='Next' disabled>Next</button>
     <br><br>
 </div>
 <div id="finish" class="row" style="visibility:hidden;">
@@ -198,7 +208,7 @@
             $('.survey_choices').hide();
             $('#'+question_id).show();
             
-            if(question_id == "age") {
+            if(question_id == "age" || question_id == "email") {
                 $('#next').removeAttr('disabled');
             }
             else {

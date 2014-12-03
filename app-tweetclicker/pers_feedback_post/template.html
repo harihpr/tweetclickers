@@ -12,26 +12,25 @@
     }
 </style>
 <div class="row skeleton">
-    <p>
-        <h3>
-            <span id="tasks_completed">You have completed:</span>
-            <span id="done" class="label label-info"></span> <span id="tasks_from">tasks of</span>
-            <span id="total" class="label label-info"></span> in this batch.
-        </h3>
-    </p>
-    <h3>Please select the type of the following tweet:</h3>
+    <h3>
+        <strong>
+        <span id="tasks_completed">You are on task </span>
+        <span id="done" class="label label-info"></span> of <span id="total" class="label label-info"></span> in this batch
+        </strong>
+    </h3>
+    Please select the type of the following tweet:
     <div class="row">
-      <div class="span6 offset3">
+      <div class="span6">
         <table class="table table-bordered">
           <tbody>
             <tr>
-              <td><i class="icon icon-user"></i>&nbsp;<strong>Username</strong>&nbsp;&nbsp;@username&nbsp;&nbsp;.&nbsp;&nbsp;19 Nov</td>
+              <td><i class="icon icon-user"></i>&nbsp;<strong>Username</strong>&nbsp;&nbsp;@username&nbsp;&nbsp;.&nbsp;&nbsp;</td>
             </tr>
             <tr>
               <td id="tweet"></td>
             </tr>
             <tr>
-              <td><i class="icon icon-share-alt"></i>&emsp;&emsp;<i class="icon icon-retweet"></i>&nbsp;&nbsp;81&emsp;&emsp;<i class="icon icon-star"></i>&nbsp;&nbsp;5</td>
+              <td><i class="icon icon-share-alt"></i>&emsp;&emsp;<i class="icon icon-retweet"></i>&nbsp;&nbsp;--&emsp;&emsp;<i class="icon icon-star"></i>&nbsp;&nbsp;--</td>
             </tr>
           </tbody>
         </table>
@@ -67,7 +66,6 @@
           <input type="radio" name="answers" value="none"> None of the above
         </label>
     </div>
-    <br>
     <div id="feedback" class="alert" role="alert"></div>
     <button type="button" class="btn btn-primary" disabled="disabled" id="confirm" value='Confirm'>Confirm</button>
 </div>
@@ -76,7 +74,6 @@
         <div class="modal-body">
             You have completed a batch of twenty tweets. Please continue with your next batch or sign out and come back later.<br>
             Your help is highly appreciated. Thank you.
-            <br>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="continue" value='continue'>Continue</button>
                 <button type="button" class="btn btn-primary" id="signout" value='signout'>Sign out</button>
@@ -89,9 +86,10 @@
     function loadUserProgress() {
         pybossa.userProgress('tweetclicker_post_prfb').done(function(data){
             var pct = Math.round((data.done*100)/data.total);
-            $("#total").text(data.total);
-            $("#done").text(data.done);
-            if(data.total >= 20 && data.total % 20 == 0) {
+            $("#total").text("20");
+            var done = data.done % 20 + 1;
+            $("#done").text(done);
+            if(data.total >= 20 && data.done % 20 == 0 && data.done > 0) {
                 $(".skeleton").hide();
                 $("#finish").css("visibility","visible");
             }
@@ -123,7 +121,7 @@
 
     pybossa.presentTask(function(task, deferred) {
         if ( !$.isEmptyObject(task) ) {
-            $('#tweet').html("<h3>"+task.info.tweet_text+"</h3>");
+            $('#tweet').html(task.info.tweet_text);
             var tweet_type = task.info.tweet_type;
             var tweet_answer = task.info.tweet_category;
             loadUserProgress();

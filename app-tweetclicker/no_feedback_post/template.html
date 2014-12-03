@@ -1,24 +1,23 @@
 <div class="row skeleton">
-    <p>
-        <h3>
-            <span id="tasks_completed">You have completed:</span>
-            <span id="done" class="label label-info"></span> <span id="tasks_from">tasks of</span>
-            <span id="total" class="label label-info"></span> in this batch.
-        </h3>
-    </p>
-    <h3>Please select the type of the following tweet:</h3>
+    <h3>
+        <strong>
+        <span id="tasks_completed">You are on task </span>
+        <span id="done" class="label label-info"></span> of <span id="total" class="label label-info"></span> in this batch
+        </strong>
+    </h3>
+    Please select the type of the following tweet:
     <div class="row">
-      <div class="span6 offset3">
+      <div class="span6">
         <table class="table table-bordered">
           <tbody>
             <tr>
-              <td><i class="icon icon-user"></i>&nbsp;<strong>Username</strong>&nbsp;&nbsp;@username&nbsp;&nbsp;.&nbsp;&nbsp;19 Nov</td>
+              <td><i class="icon icon-user"></i>&nbsp;<strong>Username</strong>&nbsp;&nbsp;@username&nbsp;&nbsp;.&nbsp;&nbsp;</td>
             </tr>
             <tr>
               <td id="tweet"></td>
             </tr>
             <tr>
-              <td><i class="icon icon-share-alt"></i>&emsp;&emsp;<i class="icon icon-retweet"></i>&nbsp;&nbsp;81&emsp;&emsp;<i class="icon icon-star"></i>&nbsp;&nbsp;5</td>
+              <td><i class="icon icon-share-alt"></i>&emsp;&emsp;<i class="icon icon-retweet"></i>&nbsp;&nbsp;--&emsp;&emsp;<i class="icon icon-star"></i>&nbsp;&nbsp;--</td>
             </tr>
           </tbody>
         </table>
@@ -77,8 +76,9 @@
         pybossa.userProgress('tweetclicker_post_nofb').done(function(data){
             var pct = Math.round((data.done*100)/data.total);
             $("#total").text("20");
-            $("#done").text(data.done % 20);
-            if(data.total >= 20 && data.total % 20 == 0) {
+            var done = data.done % 20 + 1;
+            $("#done").text(done);
+            if(data.total >= 20 && data.done % 20 == 0 && data.done > 0) {
                 $(".skeleton").hide();
                 $("#finish").css("visibility","visible");
             }
@@ -110,7 +110,7 @@
 
     pybossa.presentTask(function(task, deferred) {
         if ( !$.isEmptyObject(task) ) {
-            $('#tweet').html("<h3>"+task.info.tweet_text+"</h3>");
+            $('#tweet').html(task.info.tweet_text);
             var tweet_type = task.info.tweet_type;
             var tweet_answer = task.info.tweet_category;
             loadUserProgress();
@@ -126,36 +126,12 @@
 
             $('#confirm').off('click').on('click', function(event) {
                 selectedAnswer = $("input[type='radio']:checked");
-                if($(event.target).text() == "Next") {
-                    pybossa.saveTask(task.id, selectedAnswer.val()).done(function() {
-                        deferred.resolve();
-                    });
-                    $(event.target).text('Confirm');
-                    $(event.target).attr('disabled','disabled');
-                    $("label").removeClass("correctans incorrectans");
-                    $("input[type='radio']").removeAttr('disabled');
-                    $("input[type='radio']").attr("checked",false);
-                    $("input[type='radio']").parent('label:eq(0)').removeClass("correctans");
-                }
-                else {
-                    if(tweet_type == 'test') {
-                        if(selectedAnswer.val() == tweet_answer) {
-                            selectedAnswer.parent('label:eq(0)').addClass("correctans");
-                            $("#feedback").show().addClass("alert-success").text("Feedback: Your category choice for this tweet is the same as our trained volunteers.");
-                        }
-                        else {
-                            selectedAnswer.parent('label:eq(0)').addClass("incorrectans");
-                            correctAnswer =  $('input[type="radio"]').filter(function(){
-                                return this.value === tweet_answer;
-                            });
-                            correctAnswer.parent('label:eq(0)').addClass("correctans");
-                            $("#feedback").show().addClass("alert-danger").text("Feedback: Our trained volunteers chose a different category for this tweet.");
-                        }
-                    }
-
-                    $("input[type='radio']").attr('disabled',true);
-                    $(event.target).text('Next');
-                }
+                pybossa.saveTask(task.id, selectedAnswer.val()).done(function() {
+                    deferred.resolve();
+                });
+                $(event.target).attr('disabled','disabled');
+                $("input[type='radio']").removeAttr('disabled');
+                $("input[type='radio']").attr("checked",false);
             });
         }
         else {
@@ -166,4 +142,3 @@
 
     pybossa.run('tweetclicker_post_nofb');
 </script>
-

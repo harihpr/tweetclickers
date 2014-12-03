@@ -28,8 +28,8 @@ SECRET_KEY = 'my-session-secret'
 ITSDANGEROUSKEY = 'its-dangerous-key'
 
 ## project configuration
-BRAND = 'PyBossa'
-TITLE = 'PyBossa'
+BRAND = 'TweetClickers'
+TITLE = 'TweetClickers'
 COPYRIGHT = 'Set Your Institution'
 DESCRIPTION = 'Set the description in your config'
 TERMSOFUSE = 'http://okfn.org/terms-of-use/'
